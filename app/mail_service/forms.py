@@ -4,9 +4,8 @@ from .models import Email
 class EmailForm(forms.ModelForm):
     class Meta:
         model = Email
-        fields = ['sender', 'recipient', 'message']
+        fields = ['recipient', 'message']  # Убираем поле 'sender'
         labels = {
-            'sender': 'От кого',
             'recipient': 'Кому',
             'message': 'Текст письма',
         }

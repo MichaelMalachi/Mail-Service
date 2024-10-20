@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Success</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f4f8;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+            overflow: hidden;
+        }
+
+        h1 {
+            color: #4caf50;
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        a {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #4a90e2;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 1.1rem;
+            transition: background-color 0.3s ease;
+            position: relative;
+            z-index: 1;
+        }
+
+        a:hover {
+            background-color: #357ab7;
+        }
+
+        a:focus {
+            outline: none;
+            border: 2px solid #357ab7;
+        }
+
+        #fireworksCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="fireworksCanvas"></canvas>
+    <div>
+        <h1>Сообщение успешно отправлено!</h1>
+        <a href="/">Вернуться на главную страницу</a>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('fireworksCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        class Firework {
+            constructor(x, y, colors) {
+                this.x = x;
+                this.y = y;
+                this.sparks = [];
+                this.colors = colors;
+                for (let i = 0; i < 100; i++) {
+                    this.sparks.push({
+                        x: this.x,
+                        y: this.y,
+                        angle: Math.random() * 2 * Math.PI,
+                        speed: Math.random() * 5 + 1,
+                        radius: Math.random() * 2 + 1,
+                        opacity: 1,
+                        color: this.colors[Math.floor(Math.random() * this.colors.length)]
+                    });
+                }
+            }
+
+            update() {
+                this.sparks.forEach(spark => {
+                    spark.x += Math.cos(spark.angle) * spark.speed;
+                    spark.y += Math.sin(spark.angle) * spark.speed;
+                    spark.opacity -= 0.02;
+                });
+                this.sparks = this.sparks.filter(spark => spark.opacity > 0);
+            }
+
+            draw() {
+                this.sparks.forEach(spark => {
+                    ctx.beginPath();
+                    ctx.arc(spark.x, spark.y, spark.radius, 0, 2 * Math.PI);
+                    ctx.fillStyle = `rgba(${spark.color}, ${spark.opacity})`;
+                    ctx.fill();
+                });
+            }
+        }
+
+        let fireworks = [];
+        const colors = [
+            '255, 0, 0',   // Красный
+            '0, 255, 0',   // Зеленый
+            '0, 0, 255',   // Синий
+            '255, 255, 0', // Желтый
+            '255, 165, 0'  // Оранжевый
+        ];
+
+        function createFirework() {
+            const x = Math.random() * canvas.width;
+            const y = Math.random() * canvas.height;
+            fireworks.push(new Firework(x, y, colors));
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            fireworks.forEach(firework => {
+                firework.update();
+                firework.draw();
+            });
+            fireworks = fireworks.filter(firework => firework.sparks.length > 0);
+            requestAnimationFrame(animate);
+        }
+
+        setInterval(createFirework, 1000); // Запуск фейерверка каждые 1000мс
+        animate();
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    </script>
+</body>
+</html>
