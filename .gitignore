@@ -1,0 +1,5 @@
+.myvenv/
+.idea/
+myvenv/
+app/credentials.json
+app/token.json
