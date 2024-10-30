@@ -1,6 +1,10 @@
 from django.shortcuts import render, redirect
 from .forms import EmailForm
-from .gmail_service import get_gmail_service, send_email
+from mail_service.tasks import send_email_task  # Импортируем задачу отсюда
+
+import logging
+
+logger = logging.getLogger(__name__)
 
 def send_email_view(request):
     if request.method == 'POST':
@@ -14,16 +18,14 @@ def send_email_view(request):
             recipient = email_instance.recipient
             message = email_instance.message
 
-            # Отправляем письмо через Gmail API
-            service = get_gmail_service()
-            send_email(
-                service=service,
-                sender=sender,  # Используем фиксированный email
-                to=recipient,
+            # Отправляем письмо асинхронно через Celery
+            send_email_task.delay(
+                sender=sender,
+                recipient=recipient,
                 subject="Новое письмо от Django",
-                message_text=message
+                message=message
             )
-
+            logger.info(f"Задача send_email_task отправлена для получателя {recipient}")
             # Сохраняем данные после отправки
             email_instance.sender = sender  # Сохраняем отправителя в базу данных, если это нужно
             email_instance.save()
